@@ -8,10 +8,11 @@ import torch.utils.data as data
 from torchvision.utils import save_image
 from PIL import Image, ImageFile
 from net import Net
-from utils import DEVICE, train_transform, test_transform, FlatFolderDataset, InfiniteSamplerWrapper, plot_grad_flow, adjust_learning_rate
+from utils import DEVICE, train_transform, test_transform, FlatFolderDataset, InfiniteSamplerWrapper, adjust_learning_rate
 Image.MAX_IMAGE_PIXELS = None  
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
+import pdb
 
 def train(args):
     logging.basicConfig(filename='training.log',
@@ -52,7 +53,6 @@ def train(args):
         print(loss)
         loss.sum().backward()
         
-        #plot_grad_flow(GMMN.named_parameters())
         optimizer.step()
 
         if (img_index+1)%args.log_interval == 0:
@@ -69,7 +69,11 @@ def eval(args):
     logging.info(mes)
     model = Net(args)
     model.eval()
+
+    # torch.save(model.state_dict(), "/tmp/image_artist_style.pth")
     model = model.to(DEVICE)
+
+    # pdb.set_trace()
     
     tf = test_transform()
     if args.run_folder == True:

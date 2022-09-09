@@ -24,7 +24,7 @@ from . import artist_style
 
 import pdb
 
-PHOTO_STYLE_MULTI_TIMES = 8
+ARTIST_STYLE_MULTI_TIMES = 8
 
 
 def get_model():
@@ -57,15 +57,6 @@ def model_forward(model, device, content_tensor, style_tensor):
         output_tensor = model(content_tensor, style_tensor)
 
     return output_tensor
-
-
-# def model_forward(model, device, input_tensor, multi_times):
-#     # zeropad for model
-#     H, W = input_tensor.size(2), input_tensor.size(3)
-#     if H % multi_times != 0 or W % multi_times != 0:
-#         input_tensor = todos.data.zeropad_tensor(input_tensor, times=multi_times)
-#     output_tensor = todos.model.forward(model, device, input_tensor)
-#     return output_tensor[:, :, 0:H, 0:W]
 
 
 def image_client(name, content_files, output_dir):
@@ -108,29 +99,32 @@ def image_predict(content_files, style_files, output_dir):
     content_filenames = todos.data.load_files(content_files)
     style_filenames = todos.data.load_files(style_files)
 
-    style_tensor = todos.data.load_tensor(style_files)
+    # style_tensor = todos.data.load_tensor(style_files)
 
     # start predict
-    progress_bar = tqdm(total=len(image_filenames))
-    for filename in image_filenames:
-        progress_bar.update(1)
+    progress_bar = tqdm(total=len(content_filenames) * len(style_filenames))
+    for content_filename in content_filenames:
+        content_tensor = todos.data.load_tensor(content_filename)
 
-        # orig input
-        content_tensor = todos.data.load_tensor(filename)
         B, C, H, W = content_tensor.shape
-        Hnew = int(PHOTO_STYLE_MULTI_TIMES * math.ceil(H / PHOTO_STYLE_MULTI_TIMES))
-        Wnew = int(PHOTO_STYLE_MULTI_TIMES * math.ceil(W / PHOTO_STYLE_MULTI_TIMES))
+        Hnew = int(ARTIST_STYLE_MULTI_TIMES * math.ceil(H / ARTIST_STYLE_MULTI_TIMES))
+        Wnew = int(ARTIST_STYLE_MULTI_TIMES * math.ceil(W / ARTIST_STYLE_MULTI_TIMES))
+        
         if Hnew != H or Wnew != W:
             content_tensor = F.interpolate(content_tensor, size=(Hnew, Wnew), mode="bilinear", align_corners=False)
-        B, C, H, W = style_tensor.shape
-        if Hnew != H or Wnew != W:
-            style_tensor = F.interpolate(style_tensor, size=(Hnew, Wnew), mode="bilinear", align_corners=False)
 
-        predict_tensor = model_forward(model, device, content_tensor, style_tensor)
-        output_file = f"{output_dir}/{os.path.basename(filename)}"
+        for style_filename in style_filenames:
+            progress_bar.update(1)
+            style_tensor = todos.data.load_tensor(style_filename)
+            B, C, H, W = style_tensor.shape
+            if Hnew != H or Wnew != W:
+                style_tensor = F.interpolate(style_tensor, size=(Hnew, Wnew), mode="bilinear", align_corners=False)
 
-        todos.data.save_tensor([content_tensor, style_tensor, predict_tensor], output_file)
+            predict_tensor = model_forward(model, device, content_tensor, style_tensor)
 
+            content_base_filename = os.path.basename(content_filename).split(".")[0]
+            output_file = f"{output_dir}/{content_base_filename}_{os.path.basename(style_filename)}"
+            todos.data.save_tensor([content_tensor, style_tensor, predict_tensor], output_file)
 
 def video_service(input_file, output_file, targ):
     # load video

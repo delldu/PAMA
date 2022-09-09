@@ -294,7 +294,7 @@ class StyleModel(nn.Module):
 
         self.vgg = vgg19[:44]
 
-        self.vgg_0_4 = self.vgg
+        self.vgg_0_4 = self.vgg[0:4]
         self.vgg_4_11 = self.vgg[4:11]
         self.vgg_11_18 = self.vgg[11:18]
         self.vgg_18_31 = self.vgg[18:31]

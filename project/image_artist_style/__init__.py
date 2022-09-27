@@ -1,4 +1,4 @@
-"""Image/Video Photo Style Package."""  # coding=utf-8
+"""Image/Video Artist Style Package."""  # coding=utf-8
 #
 # /************************************************************************************
 # ***
@@ -41,6 +41,7 @@ def get_model():
     model = model.to(device)
     model.eval()
 
+    print(f"Running on {device} ...")
     model = torch.jit.script(model)
 
     todos.data.mkdir("output")
@@ -53,8 +54,12 @@ def get_model():
 def model_forward(model, device, content_tensor, style_tensor):
     content_tensor = content_tensor.to(device)
     style_tensor = style_tensor.to(device)
-    with torch.no_grad():
-        output_tensor = model(content_tensor, style_tensor)
+
+    torch.cuda.synchronize()
+    with torch.jit.optimized_execution(False):
+        with torch.no_grad():
+            output_tensor = model(content_tensor, style_tensor)
+    torch.cuda.synchronize()
 
     return output_tensor
 

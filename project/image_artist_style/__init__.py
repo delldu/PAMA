@@ -114,7 +114,7 @@ def image_predict(content_files, style_files, output_dir):
         B, C, H, W = content_tensor.shape
         Hnew = int(ARTIST_STYLE_MULTI_TIMES * math.ceil(H / ARTIST_STYLE_MULTI_TIMES))
         Wnew = int(ARTIST_STYLE_MULTI_TIMES * math.ceil(W / ARTIST_STYLE_MULTI_TIMES))
-        
+
         if Hnew != H or Wnew != W:
             content_tensor = F.interpolate(content_tensor, size=(Hnew, Wnew), mode="bilinear", align_corners=False)
 
@@ -130,6 +130,7 @@ def image_predict(content_files, style_files, output_dir):
             content_base_filename = os.path.basename(content_filename).split(".")[0]
             output_file = f"{output_dir}/{content_base_filename}_{os.path.basename(style_filename)}"
             todos.data.save_tensor([content_tensor, style_tensor, predict_tensor], output_file)
+
 
 def video_service(input_file, output_file, targ):
     # load video

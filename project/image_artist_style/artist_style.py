@@ -124,6 +124,7 @@ decoder = nn.Sequential(
     nn.Conv2d(64, 3, (3, 3)),
 )
 
+
 class AttentionUnit(nn.Module):
     def __init__(self, channels):
         super(AttentionUnit, self).__init__()

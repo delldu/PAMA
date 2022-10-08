@@ -12,7 +12,6 @@
 __version__ = "1.0.0"
 
 import os
-import time
 import math
 from tqdm import tqdm
 import torch
@@ -52,16 +51,7 @@ def get_model():
 
 
 def model_forward(model, device, content_tensor, style_tensor):
-    content_tensor = content_tensor.to(device)
-    style_tensor = style_tensor.to(device)
-
-    torch.cuda.synchronize()
-    with torch.jit.optimized_execution(False):
-        with torch.no_grad():
-            output_tensor = model(content_tensor, style_tensor)
-    torch.cuda.synchronize()
-
-    return output_tensor
+    return todos.model.two_forward(model, device, content_tensor, style_tensor)
 
 
 def image_client(name, content_files, output_dir):
@@ -103,8 +93,6 @@ def image_predict(content_files, style_files, output_dir):
     # load files
     content_filenames = todos.data.load_files(content_files)
     style_filenames = todos.data.load_files(style_files)
-
-    # style_tensor = todos.data.load_tensor(style_files)
 
     # start predict
     progress_bar = tqdm(total=len(content_filenames) * len(style_filenames))

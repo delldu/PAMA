@@ -236,11 +236,6 @@ class StyleModel(nn.Module):
         return self.decoder(Fcs3)  # -- [1, 3, 512, 512]
 
     def forward_vgg(self, x) -> List[torch.Tensor]:
-        # relu1_1 = self.vgg[:4](x)
-        # relu2_1 = self.vgg[4:11](relu1_1)
-        # relu3_1 = self.vgg[11:18](relu2_1)
-        # relu4_1 = self.vgg[18:31](relu3_1)
-        # relu5_1 = self.vgg[31:44](relu4_1)
         relu1_1 = self.vgg_0_4(x)
         relu2_1 = self.vgg_4_11(relu1_1)
         relu3_1 = self.vgg_11_18(relu2_1)

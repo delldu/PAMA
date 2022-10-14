@@ -50,8 +50,15 @@ def get_model():
     return model, device
 
 
-def model_forward(model, device, content_tensor, style_tensor):
-    return todos.model.two_forward(model, device, content_tensor, style_tensor)
+def model_forward(model, device, content_tensor, style_tensor, multi_times=1):
+    # zeropad for model
+    H, W = content_tensor.size(2), content_tensor.size(3)
+    if H % multi_times != 0 or W % multi_times != 0:
+        content_tensor = todos.data.zeropad_tensor(content_tensor, times=multi_times)
+
+    output_tensor = todos.model.two_forward(model, device, content_tensor, style_tensor)
+
+    return output_tensor[:, :, 0:H, 0:W]
 
 
 def image_client(name, content_files, output_dir):
@@ -98,25 +105,19 @@ def image_predict(content_files, style_files, output_dir):
     progress_bar = tqdm(total=len(content_filenames) * len(style_filenames))
     for content_filename in content_filenames:
         content_tensor = todos.data.load_tensor(content_filename)
-
         B, C, H, W = content_tensor.shape
-        Hnew = int(ARTIST_STYLE_MULTI_TIMES * math.ceil(H / ARTIST_STYLE_MULTI_TIMES))
-        Wnew = int(ARTIST_STYLE_MULTI_TIMES * math.ceil(W / ARTIST_STYLE_MULTI_TIMES))
-
-        if Hnew != H or Wnew != W:
-            content_tensor = F.interpolate(content_tensor, size=(Hnew, Wnew), mode="bilinear", align_corners=False)
 
         for style_filename in style_filenames:
             progress_bar.update(1)
             style_tensor = todos.data.load_tensor(style_filename)
-            B, C, H, W = style_tensor.shape
-            if Hnew != H or Wnew != W:
-                style_tensor = F.interpolate(style_tensor, size=(Hnew, Wnew), mode="bilinear", align_corners=False)
-
             predict_tensor = model_forward(model, device, content_tensor, style_tensor)
 
             content_base_filename = os.path.basename(content_filename).split(".")[0]
             output_file = f"{output_dir}/{content_base_filename}_{os.path.basename(style_filename)}"
+
+            SB, SC, SH, SW = style_tensor.shape
+            if SH != H or SW != W:
+                style_tensor = F.interpolate(style_tensor, size=(H, W), mode="bilinear", align_corners=False)
             todos.data.save_tensor([content_tensor, style_tensor, predict_tensor], output_file)
 
 

@@ -22,7 +22,7 @@ from . import artist_style
 import pdb
 
 
-def get_model():
+def get_artist_style_model():
     """Create model."""
 
     model_path = "models/image_artist_style.pth"
@@ -51,7 +51,7 @@ def image_predict(content_files, style_files, output_dir):
     todos.data.mkdir(output_dir)
 
     # load model
-    model, device = get_model()
+    model, device = get_artist_style_model()
 
     # load files
     content_filenames = todos.data.load_files(content_files)

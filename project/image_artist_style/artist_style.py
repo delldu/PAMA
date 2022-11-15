@@ -207,7 +207,7 @@ class PAMA(nn.Module):
 class StyleModel(nn.Module):
     def __init__(self):
         super(StyleModel, self).__init__()
-        # Define max GPU/CPU memory -- 10G
+        # Define max GPU/CPU memory -- 5G, 340ms
         self.MAX_H = 1024
         self.MAX_W = 1024
         self.MAX_TIMES = 4

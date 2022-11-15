@@ -23,7 +23,7 @@ if __name__ == "__main__":
     model, device = image_artist_style.get_artist_style_model()
 
     N = 100
-    B, C, H, W = 1, 3, 1024, 1024
+    B, C, H, W = 1, 3, model.MAX_H, model.MAX_W
 
     mean_time = 0
     progress_bar = tqdm(total=N)
